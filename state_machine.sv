@@ -1,3 +1,4 @@
+/* Added by juhi */
 module state_machine(input clk,input reset,input sm_enable,input sm_restart,output reg [4:0] pc,input [15:0] instr_data,output reg valid,output reg rd,input flag_abnormal,input [15:0] jmp_data, input penable);
 
 typedef enum {IDLE,DECODE,WAIT} sm;
