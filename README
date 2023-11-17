@@ -1,0 +1,10 @@
+git init
+git clone https://github.com/PurvinTalati/RP2040-Verilog-Design.git
+cd RP2040-Verilog-Design/
+ls
+gvim state_machine.sv
+git add .
+git add state_machine.sv
+git commit -m "first commit"
+git push -u origin main
+
