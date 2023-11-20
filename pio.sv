@@ -27,9 +27,14 @@ wire penable;
 wire pclk;
 wire [16:12] wrap_top;
 wire [16:12] wrap_bottom;
+wire sm_enable,sm_restart;
+
 //OSR
 wire sm_shiftctrl = r1.sm0_shtctrl.out_shtdir;
 wire [7:0] OSR_value, OSR_valid;
+wire [15:0] INT;
+wire [7:0] FRAC;
+wire [23:0] div;
 
 assign sm_enable  = r1.ctrl[0];
 assign sm_restart = r1.ctrl[4];
@@ -40,7 +45,7 @@ assign INT = r1.sm0_clkdiv.Int;
 assign FRAC = r1.sm0_clkdiv.frac;
 assign div = r1.sm0_clkdiv[31:8];
 assign div = r1.sm0_clkdiv[31:8];
-assign wrap_top = r1.sm0_execctrl.wrap_top
+assign wrap_top = r1.sm0_execctrl.wrap_top;
 assign wrap_bottom = r1.sm0_execctrl.wrap_bottom;
 
 shift_register OSR(.clk(clk), .reset(reset), 
