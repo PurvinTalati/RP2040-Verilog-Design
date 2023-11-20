@@ -1,5 +1,10 @@
-/* Added by juhi */
-module state_machine(input clk,input reset,input sm_enable,input sm_restart,output reg [4:0] pc,input [15:0] instr_data,output reg valid,output reg rd,input flag_abnormal,input [15:0] jmp_data, input penable);
+module state_machine(input clk,input reset,input sm_enable,input sm_restart,output reg [4:0] pc,input [15:0] instr_data,output reg valid,output reg rd,input flag_abnormal,input [15:0] jmp_data, input penable,
+      input [4:0] wrap_bottom,
+      input [4:0] wrap_top,
+      //OSR
+      input [7:0] OSR_value,
+      input [7:0] OSR_valid
+      );
 
 typedef enum {IDLE,DECODE,WAIT} sm;
 
@@ -101,24 +106,30 @@ begin
                      scratchY = scratchY_update - 5'b1;
                      $display("JMP condition Y--: %h \t pc:%h \t scratchY: %h", decode_instr_data, pc, scratchY_update);  
                    end    
-                   else if (condition == 3'b101) begin
+                   else if (condition == 3'b101) begin    //X!=Y
                      if(scratchX != scratchY)
                        jump_valid = 1;
                    end      
-                   else if(condition == 3'b110) begin
-                     if(top.p0.p0.gpio_pins[top.p0.p0.r1.sm0_execctrl[28:24]] == 1'b1) 
-                       jump_valid = 1;
-                     else jump_valid = 0;
-                     $display("JMP condition (pin): %h \t pc:%h \t jmp_pin: #%h, %h", decode_instr_data, pc, top.p0.p0.r1.sm0_execctrl[28:24], top.p0.p0.gpio_pins[top.p0.p0.r1.sm0_execctrl[28:24]]);  
+                   else if(condition == 3'b110) begin     //JMP_PIN
+                    if(top.p0.p0.gpio_pins[top.p0.p0.r1.sm0_execctrl[28:24]] == 1'b1) 
+                      jump_valid = 1;
+                    else jump_valid = 0;
+                    $display("JMP condition (pin): %h \t pc:%h \t jmp_pin: #%h, %h", decode_instr_data, pc, top.p0.p0.r1.sm0_execctrl[28:24], top.p0.p0.gpio_pins[top.p0.p0.r1.sm0_execctrl[28:24]]);  
                    end 
-                   else jump_valid = 0;                //other conditions to be coded
+                   else if(condition == 3'b111) begin     //!OSRE
+                    if(OSR_value != 8'b0)
+                      jump_valid = 1;
+                    else jump_valid = 0;
+                   end
                     
                     if(jump_valid) begin
                      pc = jmp_addr;
                      valid = 1;
                      delay = decode_instr_data [12:8];
                     end else begin
-                     pc = pc + 'h1;
+                     if(pc == wrap_top)
+                        pc = wrap_bottom;
+                     else pc = pc + 'h1;
                     end
                     rd = 1;
                     if(delay!=0) begin
@@ -137,8 +148,10 @@ begin
             if(sm_enable==0)
                 next_state = IDLE;
             else begin
-                if(delay==0)
+                if(delay==1) begin
+                   delay = delay - 1;
                    next_state = DECODE;
+                end
                 else
                    delay = delay - 1;
             end
