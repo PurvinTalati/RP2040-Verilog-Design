@@ -33,9 +33,8 @@ assign r1.sm0_addr.curr_inst_addr = pc;
 assign flag_ab = (r1.SM0_INSTR_SEL & RW) ? 1'b1 : 1'b0;
 assign use_divider = (r1.sm0_clkdiv[31:16]<2) ? 1'b0 : 1'b1;
 assign div = r1.sm0_clkdiv[31:8];
-assign wrap_top = r1.sm0_execctrl.wrap_top
+assign wrap_top = r1.sm0_execctrl.wrap_top;
 assign wrap_bottom = r1.sm0_execctrl.wrap_bottom;
-assign wrapt_top = r1.sm0_execctr
 pio_regs r1(clk,reset,sel,RW,addr,wdata,rdata,busy, memory_waddr, memory_wdata, wr);
 
 single_port_ram s1(clk,reset,memory_waddr, pc, memory_wdata, memory_rdata,wr,rd);

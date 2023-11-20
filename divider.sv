@@ -18,20 +18,20 @@ module divider (
 always @(posedge clk or posedge reset) begin
     if (reset) begin
       div_counter <= 0;
-      pen <= 1;
-      old_pen <= 0;
+     // pen <= 1;
+      //old_pen <= 0;
     end else begin
       if (use_divider) begin
-        old_pen = pen;
-        div_counter = div_counter + 256;
-        if (div_counter >= div - 256)
-          div_counter = div_counter - (div - 256);
-        pen = (div_counter-256) < (div >> 1);
+       // old_pen = pen;
+        div_counter = div_counter + 1;
+        if (div_counter >= div + 1)
+       //   div_counter = div_counter - (div - 256);
+        pen = ~pen;
       end
     end
   end
 
-  assign penable = (use_divider) ? pen & ~old_pen : clk;
+  //assign penable = (use_divider) ? pen & ~old_pen : clk;
   assign pclk = pen;
 
 endmodule
