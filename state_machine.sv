@@ -28,10 +28,10 @@ always @(posedge clk, posedge reset) begin
     scratchY      <= 32'b0;
   end else begin
     current_state <= next_state; 
-    if(condition == 3'b010)
-      scratchX      <= scratchX - 5'b1;
-    if(condition == 3'b100)
-      scratchY      <= scratchY - 5'b1;
+   // if(condition == 3'b010)
+    //  scratchX      <= scratchX - 5'b1;
+   // if(condition == 3'b100)
+   //   scratchY      <= scratchY - 5'b1;
   end 
 end
 
@@ -122,24 +122,58 @@ begin
                     else jump_valid = 0;
                    end
                     
+                    delay = decode_instr_data [12:8];
                     if(jump_valid) begin
                      pc = jmp_addr;
                      valid = 1;
-                     delay = decode_instr_data [12:8];
                     end else begin
                      if(pc == wrap_top)
                         pc = wrap_bottom;
                      else pc = pc + 'h1;
+                     //delay=0;
                     end
                     rd = 1;
                     if(delay!=0) begin
                       next_state = WAIT;
-                      delay = delay - 1;
+                    //  delay = delay - 1;
                     end
                     $display("inside JMP %h %h",decode_instr_data,pc);
                 end
-               // 3'b110: next_state = IRQ;
-               // 3'b111: next_state = SET;
+                3'b110: begin
+                   delay = decode_instr_data [12:8];
+                   if(decode_instr_data[6]) begin
+
+                   end
+                   if(delay==0) begin
+                   if(pc == wrap_top)
+                        pc = wrap_bottom;
+                   else pc = pc + 'h1;
+                   end
+                   else begin
+                       next_state = WAIT;
+                    //  delay = delay - 1;
+                   end
+                   
+                    end
+                3'b111: begin
+                   $display("INSIDE set");
+                   case(condition)
+                       3'b001 : scratchX = decode_instr_data[4:0];
+                       3'b010 : scratchY = decode_instr_data[4:0];
+                   endcase
+                   delay = decode_instr_data [12:8];
+                   if(delay==0) begin
+                   if(pc == wrap_top)
+                        pc = wrap_bottom;
+                   else pc = pc + 'h1;
+                   end
+                   else begin
+                       next_state = WAIT;
+                    //  delay = delay - 1;
+                   end
+
+
+               end
                endcase
             end
         end
@@ -157,6 +191,7 @@ begin
             end
         end
     endcase
+
   end
 end
 endmodule
